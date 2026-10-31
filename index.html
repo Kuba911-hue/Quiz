@@ -4,111 +4,410 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz – Straż Graniczna i Wiedza Ogólna</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            max-width: 700px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-        .card {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        h2 {
-            color: #004080;
-            margin-top: 0;
-            font-size: 1.2rem;
-            border-bottom: 2px solid #eaeaea;
-            padding-bottom: 10px;
-        }
-        .question-text {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-        .btn-option {
-            display: block;
-            width: 100%;
-            text-align: left;
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            padding: 12px 18px;
-            margin: 10px 0;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .btn-option:hover:not(:disabled) {
-            background: #e2e6ea;
-            border-color: #cbd3da;
-        }
-        .btn-option.correct {
-            background: #d4edda !important;
-            border-color: #28a745 !important;
-            color: #155724;
-        }
-        .btn-option.incorrect {
-            background: #f8d7da !important;
-            border-color: #dc3545 !important;
-            color: #721c24;
-        }
-        .btn-option:disabled {
-            cursor: default;
-        }
-        .btn-action {
-            background: #004080;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 20px;
-            font-weight: bold;
-            display: none;
-        }
-        .btn-action:hover {
-            background: #002b5c;
-        }
-        .progress {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .score-container {
-            text-align: center;
-        }
-        .score-container h3 {
-            font-size: 2rem;
-            color: #2c3e50;
+            font-family: 'Inter', sans-serif;
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
 
-<div class="card" id="quiz-container">
-    <div class="score-container">
-        <h2>Witaj w quizie przygotowującym!</h2>
-        <p>Aplikacja wylosuje dla Ciebie 10 pytań z puli 200 pytań.</p>
-        <button class="btn-action" style="display: inline-block;" onclick="startQuiz()">Rozpocznij Quiz</button>
+    <div class="max-w-xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        <!-- Nagłówek -->
+        <div class="bg-blue-900 text-white p-6 text-center relative">
+            <h1 class="text-xl md:text-2xl font-bold">Quiz – Straż Graniczna</h1>
+            <p class="text-blue-200 text-sm mt-1">Test wiedzy ogólnej oraz przepisów SG</p>
+        </div>
+
+        <!-- Główny Kontener -->
+        <div id="quiz-card" class="p-6 md:p-8">
+            <!-- Widok Startowy -->
+            <div id="start-screen" class="text-center py-6">
+                <div class="w-20 h-20 bg-blue-100 text-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Gotowy na sprawdzian?</h2>
+                <p class="text-slate-600 mb-6">Aplikacja wylosuje 10 pytań z pełnej bazy 200 pytań. Zaznacz prawidłowe odpowiedzi i sprawdź swój wynik.</p>
+                <button id="start-btn" class="w-full sm:w-auto bg-blue-800 hover:bg-blue-900 text-white font-semibold px-8 py-3 rounded-xl transition duration-200 shadow-lg shadow-blue-900/20 active:scale-95">
+                    Rozpocznij Quiz
+                </button>
+            </div>
+
+            <!-- Widok Pytania (Ukryty na start) -->
+            <div id="question-screen" class="hidden">
+                <!-- Pasek postępu -->
+                <div class="flex justify-between items-center mb-4">
+                    <span id="progress-text" class="text-xs font-bold tracking-wider text-blue-800 uppercase">Pytanie 1 z 10</span>
+                    <span id="score-counter" class="text-xs font-semibold text-slate-500">Wynik: 0</span>
+                </div>
+                <div class="w-full bg-slate-200 h-2 rounded-full mb-6 overflow-hidden">
+                    <div id="progress-bar" class="bg-blue-800 h-full w-0 transition-all duration-300"></div>
+                </div>
+
+                <!-- Pytanie -->
+                <h3 id="question-title" class="text-lg font-semibold text-slate-800 mb-6 leading-snug"></h3>
+
+                <!-- Odpowiedzi -->
+                <div id="options-container" class="space-y-3"></div>
+
+                <!-- Przycisk Dalej -->
+                <button id="next-btn" class="hidden w-full mt-6 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition duration-200 shadow-md">
+                    Następne pytanie &rarr;
+                </button>
+            </div>
+
+            <!-- Widok Wyniku (Ukryty na start) -->
+            <div id="result-screen" class="hidden text-center py-6">
+                <div id="result-icon" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"></div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-1">Koniec Quizu!</h2>
+                <p class="text-slate-500 mb-6">Oto Twój podsumowujący wynik:</p>
+                
+                <div class="bg-slate-50 rounded-xl p-6 border border-slate-200 mb-6">
+                    <div class="text-4xl font-extrabold text-blue-900 mb-2" id="final-score">0 / 10</div>
+                    <p id="final-message" class="text-slate-600 font-medium text-sm"></p>
+                </div>
+
+                <button id="restart-btn" class="w-full sm:w-auto bg-blue-800 hover:bg-blue-900 text-white font-semibold px-8 py-3 rounded-xl transition duration-200 shadow-lg shadow-blue-900/20">
+                    Spróbuj Ponownie (Nowy Zestaw)
+                </button>
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    const bazaPytan = [
-        { q: "Co oznacza skrót G7?", o: ["grupa 7 najbardziej zadłużonych państw świata", "grupa 7 największych państw Unii Europejskiej", "grupa 7 państw, które tworzą największe i najbardziej rozwinięte gospodarki na świecie", "nieformalne forum spotkań grupy 7 państw NATO"], a: 2 },
-        { q: "Siedziba Parlamentu Europejskiego znajduje się w:", o: ["Strasburgu", "Berlinie", "Paryżu", "Warszawie"], a: 0 },
-        { q: "Brexit to:", o: ["potoczna nazwa procesu opuszczania struktur Unii Europejskiej przez Wielką Brytanię i Holandię zapoczątkowanego przez referendum w czerwcu 2016 roku", "oficjalna nazwa belgijskiego indeksu giełdowego", "potoczna nazwa procesu opuszczania struktur Unii Europejskiej przez Wielką Brytanię zapoczątkowanego przez referendum w czerwcu 2016 roku", "potoczna nazwa procesu opuszczania struktur Unii Europejskiej przez Wielką Brytanię zapoczątkowanego przez referendum w czerwcu 2020 roku"], a: 2 },
-        { q: "PIT to podatek, który nakłada się na:", o: ["osoby prawne", "osoby fizyczne", "organizacje pożytku publicznego", "fundacje"], a: 1 },
-        { q: "Aktualnie Ministrem Spraw Zagranicznych jest:", o: ["Andrzej Domański", "Jacek Czaputowicz", "Radosław Sikorski", "Paulina Hennig-Kloska"], a: 2 },
-        { q: "Polska przystąpiła do Traktatu Północnoatlantyckiego (NATO):", o: ["12 marca 1996 roku", "1 maja 1998 roku", "12 marca 1999 roku", "4 kwietnia 2000 roku"], a: 2 },
-        { q: "Sekretarzem Generalnym NATO jest:", o: ["Jonas Gahr Støre", "Jens Stoltenberg", "gen. Christopher Cavoli", "Mark Rutte"], a:
+    <script>
+        // Baza 200 pytań z pliku PDF
+        const DATABASE = [
+            { q: "Co oznacza skrót G7?", o: ["grupa 7 najbardziej zadłużonych państw świata", "grupa 7 największych państw Unii Europejskiej", "grupa 7 państw, które tworzą największe i najbardziej rozwinięte gospodarki na świecie", "nieformalne forum spotkań grupy 7 państw NATO"], a: 2 },
+            { q: "Siedziba Parlamentu Europejskiego znajduje się w:", o: ["Strasburgu", "Berlinie", "Paryżu", "Warszawie"], a: 0 },
+            { q: "Brexit to:", o: ["potoczna nazwa procesu opuszczania struktur Unii Europejskiej przez Wielką Brytanię i Holandię zapoczątkowanego przez referendum w czerwcu 2016 roku", "oficjalna nazwa belgijskiego indeksu giełdowego", "potoczna nazwa procesu opuszczania struktur Unii Europejskiej przez Wielką Brytanię zapoczątkowanego przez referendum w czerwcu 2016 roku", "potoczna nazwa procesu opuszczania struktur Unii Europejskiej przez Wielką Brytanię zapoczątkowanego przez referendum w czerwcu 2020 roku"], a: 2 },
+            { q: "PIT to podatek, który nakłada się na:", o: ["osoby prawne", "osoby fizyczne", "organizacje pożytku publicznego", "fundacje"], a: 1 },
+            { q: "Aktualnie Ministrem Spraw Zagranicznych jest:", o: ["Andrzej Domański", "Jacek Czaputowicz", "Radosław Sikorski", "Paulina Hennig-Kloska"], a: 2 },
+            { q: "Polska przystąpiła do Traktatu Północnoatlantyckiego (NATO):", o: ["12 marca 1996 roku", "1 maja 1998 roku", "12 marca 1999 roku", "4 kwietnia 2000 roku"], a: 2 },
+            { q: "Sekretarzem Generalnym NATO jest:", o: ["Jonas Gahr Støre", "Jens Stoltenberg", "gen. Christopher Cavoli", "Mark Rutte"], a: 3 },
+            { q: "Które państwa należą do grupy G7?", o: ["Stany Zjednoczone, Japonia, Niemcy, Wielka Brytania, Francja, Włochy i Kanada", "Stany Zjednoczone, Japonia, Niemcy, Wielka Brytania, Francja, Włochy i Rosja", "Stany Zjednoczone, Japonia, Niemcy, Wielka Brytania, Francja, Włochy i Hiszpania", "Stany Zjednoczone, Japonia, Niemcy, Wielka Brytania, Francja, Włochy i Indie"], a: 0 },
+            { q: "Członkiem Unii Europejskiej nie jest:", o: ["Bośnia i Hercegowina", "Słowenia", "Chorwacja", "Luksemburg"], a: 0 },
+            { q: "Ile gwiazd widnieje na fladze Unii Europejskiej?", o: ["10", "12", "15", "16"], a: 1 },
+            { q: "Jaki jest tytuł hymnu Unii Europejskiej?", o: ["Marsylianka", "Międzynarodówka", "Oda do radości", "Oda do praworządności"], a: 2 },
+            { q: "Aktualnie Prezesem Rady Ministrów jest:", o: ["Bartłomiej Sienkiewicz", "Władysław Kosiniak-Kamysz", "Donald Tusk", "Szymon Hołownia"], a: 2 },
+            { q: "Ile państw aktualnie należy do Sojuszu Północnoatlantyckiego?", o: ["21", "29", "32", "42"], a: 2 },
+            { q: "Od 2019 roku Komisji Europejskiej przewodniczy:", o: ["Manfred Weber", "Angela Merkel", "Ursula von der Leyen", "Kaja Kallas"], a: 2 },
+            { q: "Amerykańskim odpowiednikiem polskiego Ministerstwa Spraw Zagranicznych jest:", o: ["Departament Stanu", "Izba Reprezentantów", "Kongres", "Zgromadzenie Parlamentarne"], a: 0 },
+            { q: "Główna siedziba NATO znajduje się w:", o: ["Nowym Jorku", "Waszyngtonie", "Brukseli", "Paryżu"], a: 2 },
+            { q: "Aktualnie urzędującym Rzecznikiem Praw Obywatelskich jest:", o: ["Andrzej Zoll", "Adam Bodnar", "Marcin Wiącek", "Roman Giertych"], a: 2 },
+            { q: "Aktualnie prezydentem Ukrainy jest:", o: ["Petro Poroszenko", "Wiktor Janukowycz", "Aleksandr Łukaszenka", "Wołodymyr Zełenski"], a: 3 },
+            { q: "Aktualnie prezydentem Stanów Zjednoczonych jest:", o: ["Joe Biden", "Kamala Harris", "Donald Trump", "Barak Obama"], a: 2 },
+            { q: "Który z poniższych krajów nie należy do NATO?", o: ["Czarnogóra", "Albania", "Szwajcaria", "Litwa"], a: 2 },
+            { q: "Co symbolizuje flaga RP?", o: ["czystość i niewinność, odwagę i waleczność", "wiarę i krew", "pamięć, honor i poświęcenie", "męczeństwo i oddanie"], a: 0 },
+            { q: "Aneksja Krymu i wojna w Donbasie, która rozpoczęła konflikt między Federacją Rosyjską a Ukrainą, miała miejsce w roku:", o: ["2012", "2014", "2016", "2022"], a: 1 },
+            { q: "Inwazja Federacji Rosyjskiej na Ukrainę o charakterze regularnej wojny rozpoczęła się 24 lutego:", o: ["2014 r.", "2021 r.", "2022 r.", "2023 r."], a: 2 },
+            { q: "Unia Europejska, jako gospodarczo - polityczny związek państw europejskich, liczy obecnie:", o: ["25 państw członkowskich", "12 państw członkowskich", "27 państw członkowskich", "31 państw członkowskich"], a: 2 },
+            { q: "Miejsce kultu wyznawców judaizmu to:", o: ["kościół", "meczet", "synagoga", "cerkiew"], a: 2 },
+            { q: "Zagwarantowanie środkami politycznymi i militarnymi wolności i bezpieczeństwa wszystkim państwom członkowskim jest głównym celem:", o: ["Organizacji Traktatu Północnoatlantyckiego (NATO)", "Europejskiej Wspólnoty Węgla i Stali (ECSC)", "Unii Europejskiej (EU)", "Europejskiego Obszaru Gospodarczego (EOG)"], a: 0 },
+            { q: "Wolność myśli, sumienia, religii i przekonań to prawa przynależące do grupy praw:", o: ["osobistych", "politycznych", "gospodarczych, socjalnych i kulturalnych", "solidarnościowych"], a: 0 },
+            { q: "Które z wymienionych państw nie należy do Unii Europejskiej?", o: ["Luksemburg", "Szwecja", "Chorwacja", "Szwajcaria"], a: 3 },
+            { q: "Wrogi stosunek do innych przejawiający się wyższością jednej rasy nad drugą to:", o: ["mizoginia", "rasizm", "globalizacja", "ageizm"], a: 1 },
+            { q: "Dominującą religią w krajach arabskich jest:", o: ["islam", "taoizm", "buddyzm", "judaizm"], a: 0 },
+            { q: "Natychmiastowe przemieszczanie ludności z rejonów uznanych za szczególnie niebezpiecznych do rejonów, w których można zapewnić im bezpieczeństwo to:", o: ["emigracja", "ewakuacja", "elokwencja", "ekspatriacja"], a: 1 },
+            { q: "Utrzymujący się przez dłuższy czas proces wzrostu cen w gospodarce narodowej, połączony z dużą utratą wartości pieniądza to:", o: ["inflacja", "dewaluacja", "deflacja", "infrakcja"], a: 0 },
+            { q: "VAT jest podatkiem płaconym:", o: ["od towarów i usług", "tylko przez osoby fizyczne", "tylko przez osoby prawne", "tylko przez osoby kupujące tytoń i alkohol"], a: 0 },
+            { q: "Czynne prawo wyborcze nie przysługuje osobom:", o: ["pozbawionym praw publicznych w wyniku prawomocnego wyroku sądu", "które ukończyły 18 lat", "które mają powyżej 75 roku życia", "z ilorazem inteligencji poniżej statystycznej normy"], a: 0 },
+            { q: "Kto może zwrócić się do Rzecznika Praw Obywatelskich o pomoc?", o: ["wyłącznie osoby pełnoletnie", "obywatele Polski", "każda osoba, niezależnie od obywatelstwa i wieku", "tylko organizacje pozarządowe"], a: 2 },
+            { q: "W regionie Afryki Północnej położone są:", o: ["Portugalia, Hiszpania, Włochy", "Turcja, Jordania, Irak", "Maroko, Algieria, Tunezja", "RPA, Senegal, Nigeria"], a: 2 },
+            { q: "Państwa posiadające broń jądrową zgodnie z ustaleniami międzynarodowymi w ramach tzw. Non Proliferation Treaty to:", o: ["Chiny, USA, Francja, Wielka Brytania, Rosja", "Norwegia, Belgia, Dania, Finlandia, Szwecja", "Chorwacja, Słowacja, Mołdawia, Gruzja, Armenia", "Kazachstan, Turkmenistan, Turcja, Azerbejdżan, Nepal"], a: 0 },
+            { q: "Oficjalna nazwa państwa Chiny to:", o: ["Chińska Republika Ludowo-Demokratyczna", "Chińska Republika Demokratyczna", "Chińska Republika Ludowa", "Socjalistyczna Republika Chin"], a: 2 },
+            { q: "Które z wymienionych państw nie przyjęły waluty Euro?", o: ["Rumunia", "Litwa", "Portugalia", "Słowacja"], a: 0 },
+            { q: "Grenlandia to terytorium autonomiczne zależne od:", o: ["Danii", "Belgii", "Szwecji", "Rosji"], a: 0 },
+            { q: "Które z poniżej wymienionych miast posiada długowiekową historię i stanowi centralny punkt wiary dla trzech religii monoteistycznych: judaizmu, chrześcijaństwa, islamu:", o: ["Dubaj", "Pekin", "Jerozolima", "Teheran"], a: 2 },
+            { q: "Prawidłowo określone stolice krajów to:", o: ["Bruksela - Belgia; Bukareszt - Rumunia; Zagrzeb - Chorwacja", "Madryt-Rumunia; Bukareszt - Belgia; Medjugorje - Chorwacja", "Berlin - Bawaria; Bukareszt - Białoruś; Zagrzeb - Chorwacja", "Paryż Belgia; Bukareszt - Rumunia; Split - Chorwacja"], a: 0 },
+            { q: "Największe powierzchniowo państwo na świecie to:", o: ["Kanada", "Brazylia", "Rosja", "Indie"], a: 2 },
+            { q: "Literacką Nagrodę Nobla w 2018 roku otrzymała:", o: ["Dorota Masłowska", "Olga Tokarczuk", "Barbara Wysoczańska", "Wisława Szymborska"], a: 1 },
+            { q: "Maria Skłodowska-Curie otrzymała Nagrodę Nobla w dziedzinie:", o: ["chemii", "fizyki", "chemii i fizyki", "geografii"], a: 2 },
+            { q: "Rzeczpospolita należy do strefy Schengen:", o: ["od 2007 r.", "od 2004 r.", "od 2005 r.", "od 2006 r."], a: 0 },
+            { q: "Kiedy obchodzone jest w Polsce Święto Flagi?", o: ["2 maja", "12 maja", "22 lipca", "11 listopada"], a: 0 },
+            { q: "Strefa Schengen to obszar:", o: ["27 państw", "29 państw", "17 państw", "28 państw"], a: 1 },
+            { q: "Do Unii Europejskiej nie należy:", o: ["Litwa", "Malta", "Andora", "Cypr"], a: 2 },
+            { q: "Do Unii Europejskiej nie należy:", o: ["Litwa", "Łotwa", "Estonia", "Konfederacja Szwajcarska"], a: 3 },
+            { q: "Do Unii Europejskiej nie należy:", o: ["Litwa", "Słowacja", "Estonia", "Norwegia"], a: 3 },
+            { q: "Członkiem Unii Europejskiej nie jest:", o: ["Mołdawia", "Litwa", "Łotwa", "Estonia"], a: 0 },
+            { q: "Wspólna waluta większości krajów UE to:", o: ["euro", "dolar amerykański", "złoty", "marka"], a: 0 },
+            { q: "Oficjalny status Polski w NATO to:", o: ["państwo neutralne", "państwo członkowskie", "państwo obserwator", "państwo wspierające"], a: 1 },
+            { q: "Skrót NATO oznacza:", o: ["National Treaty Organization", "Northern Atlantic Trading Office", "National Atlantic Trade Organization", "North Atlantic Treaty Organization"], a: 3 },
+            { q: "NATO jest sojuszem:", o: ["polityczno-militarnym", "gospodarczym", "ekonomicznym", "Unii Europejskiej"], a: 0 },
+            { q: "Akt prawny regulujący współpracę krajów w ramach NATO to:", o: ["Traktat Waszyngtoński", "Traktat Lizboński", "Traktat Wersalski", "Traktat Amsterdamski"], a: 0 },
+            { q: "RP przystąpiła do NATO w:", o: ["1999 roku", "2004 roku", "1949 roku", "2000 roku"], a: 0 },
+            { q: "Bułgaria:", o: ["należy tylko do Unii Europejskiej", "nie należy do Unii Europejskiej", "należy do Unii Europejskiej i strefy Schengen", "należy do Unii Europejskiej i nie należy do strefy Schengen"], a: 3 },
+            { q: "Rumunia:", o: ["należy tylko do Unii Europejskiej", "nie należy do Unii Europejskiej", "należy do Unii Europejskiej i strefy Schengen", "należy do Unii Europejskiej i nie należy do strefy Schengen"], a: 3 },
+            { q: "Największe państwo świata pod względem liczby ludności to:", o: ["Chiny", "Indie", "Rosja", "Stany Zjednoczone"], a: 1 },
+            { q: "Najwyższym i najstarszym odznaczeniem państwowym w Polsce jest:", o: ["Order Orła Białego", "Virtuti Militari", "Order Odrodzenia Polski", "Order Uśmiechu"], a: 0 },
+            { q: "Pluralizm polityczny oznacza:", o: ["istnienie dwóch lub większej ilości partii politycznych", "istnienie systemu dwupartyjnego", "istnienie centralnego zarządzania", "istnienie systemu autorytarnego"], a: 0 },
+            { q: "Rzeczpospolita Polska nie graniczy z:", o: ["Niemcami", "Czechami", "Słowacją", "Łotwą"], a: 3 },
+            { q: "Rzeczpospolita Polska nie graniczy z:", o: ["Estonią", "Litwą", "Ukrainą", "Słowacją"], a: 0 },
+            { q: "Rzeczpospolita Polska graniczy z:", o: ["5 krajami", "6 krajami", "7 krajami", "8 krajami"], a: 2 },
+            { q: "Rzeczpospolita Polska graniczy z:", o: ["tylko krajami Unii Europejskiej", "tylko krajami spoza Unii Europejskiej", "krajami z Unii Europejskiej i spoza Unii Europejskiej", "krajami Trójkąta Weimarskiego"], a: 2 },
+            { q: "Sprzedaż towarów wytwarzanych w danym państwie podmiotom zagranicznym to:", o: ["eksport", "import", "embargo", "dumping"], a: 0 },
+            { q: "Miejsce kultu wyznawców islamu to:", o: ["kościół", "meczet", "synagoga", "cerkiew"], a: 1 },
+            { q: "Zgodnie z aktualną treścią hymn państwowy RP rozpoczyna się od słów:", o: ["Jeszcze Polska nie zginęła, póki my żyjemy", "Jeszcze Polska nie zginęła, jeśli my żyjemy", "Jeszcze Polska nie zginęła, kiedy my żyjemy", "Jeszcze Polska nie zginęła, jeżeli my żyjemy"], a: 0 },
+            { q: "Rzeczpospolita Polska weszła do Unii Europejskiej w roku:", o: ["2004", "2005", "2007", "2010"], a: 0 },
+            { q: "Polska ma najdłuższą granicę z:", o: ["Niemcami", "Czechami", "Ukrainą", "Słowacją"], a: 1 },
+            { q: "Najkrótszy odcinek linii granicznej RP to granica z:", o: ["Federacją Rosyjską", "Republiką Litewską", "Republiką Białorusi", "Republiką Czeską"], a: 0 },
+            { q: "Pierwsza premier-kobieta w Polsce to:", o: ["Beata Szydło", "Ewa Kopacz", "Hanna Suchocka", "Agata Buzek"], a: 2 },
+            { q: "W skład tzw. krajów bałtyckich wchodzą:", o: ["Dania, Niemcy, Polska", "Dania, Finlandia, Szwecja", "Litwa, Łotwa, Estonia", "Polska, Litwa, Łotwa"], a: 2 },
+            { q: "Które z wymienionych państw nie jest monarchią?", o: ["Słowenia", "Wielka Brytania", "Belgia", "Dania"], a: 0 },
+            { q: "Języki urzędowe w Belgii to:", o: ["francuski, niemiecki, niderlandzki", "francuski, belgijski, angielski", "francuski, angielski, niemiecki", "belgijski, angielski, niderlandzki"], a: 0 },
+            { q: "Które z niżej wymienionych państw nie należy do inicjatywy Trójmorza?", o: ["Estonia", "Rumunia", "Finlandia", "Węgry"], a: 2 },
+            { q: "Walutą Szwajcarii jest:", o: ["euro", "marka szwajcarska", "korona szwajcarska", "frank szwajcarski"], a: 3 },
+            { q: "Jaka religia dominuje w Turcji?", o: ["buddyzm", "hinduizm", "islam", "chrześcijaństwo"], a: 2 },
+            { q: "Konstytucja RP została uchwalona przez:", o: ["Zgromadzenie Narodowe RP", "Sejm RP", "Senat RP", "Prezydenta RP"], a: 0 },
+            { q: "Organem odpowiedzialnym za ochronę praw człowieka i obywatela przed naruszeniami ze strony władzy publicznej jest:", o: ["Rzecznik Praw Obywatelskich", "Prezes Najwyższej Izby Kontroli", "Rzecznik Praw Konsumenta", "Prezes Trybunału Konstytucyjnego"], a: 0 },
+            { q: "Jak nazywa się instytucja kontrolująca zgodność ustaw z Konstytucją?", o: ["Sąd Najwyższy", "Trybunał Konstytucyjny", "Trybunał Sprawiedliwości UE", "Prokuratura Krajowa"], a: 1 },
+            { q: "Zgodnie z art. 4 Konstytucji RP władza zwierzchnia w RP należy do:", o: ["Sejmu i Senatu", "Prezydenta RP", "organów państwa", "Narodu"], a: 3 },
+            { q: "Kto zwołuje posiedzenie Rady Ministrów?", o: ["Prezes Rady Ministrów", "Prezydent RP", "Marszałek Sejmu", "Marszałek Senatu"], a: 0 },
+            { q: "Jaki akt prawny określa ustrój RP?", o: ["ustawa", "rozporządzenie", "Konstytucja RP", "uchwała Sejmu"], a: 2 },
+            { q: "Warunkiem wejścia w życie każdej ustawy w RP jest podpisanie jej przez:", o: ["Marszałka Sejmu", "Marszałka Senatu", "Premiera", "Prezydenta"], a: 3 },
+            { q: "Jaką formę ma interpelacja poselska zgodnie z Konstytucją RP?", o: ["zaoczną", "pisemną", "telefoniczną", "elektroniczną"], a: 1 },
+            { q: "Senatorowie w Polsce wybierani są na kadencję:", o: ["3-letnią", "4-letnią, chyba że prezydent lub Sejm w określonych warunkach podejmą decyzję o jej skróceniu", "5-letnią, chyba że prezydent lub Sejm w określonych warunkach podejmą decyzję o jej skróceniu", "6-letnią"], a: 2 },
+            { q: "Czynne prawo wyborcze oznacza:", o: ["prawo obywatela do głosowania w wyborach", "prawo obywatela do kandydowania w wyborach", "prawo obywatela do organizowania wyborów", "wszystkie powyższe odpowiedzi są prawidłowe"], a: 0 },
+            { q: "Prawem przysługującym obywatelom w RP jest:", o: ["prawo do uczestniczenia w wyborach i referendum", "prawo do opieki ze strony Rzeczypospolitej Polskiej", "prawo do własności", "wszystkie odpowiedzi są prawidłowe"], a: 3 },
+            { q: "Klub poselski, zgodnie z regulaminem Sejmu i Senatu, tworzy co najmniej:", o: ["15 posłów", "3 posłów", "100 posłów", "360 posłów"], a: 0 },
+            { q: "Trójpodział władzy oznacza:", o: ["podział władzy między Prezydenta, Sejm i Senat", "podział władzy w rządzie", "podział władzy między władzę centralną, samorządową i lokalną", "podział władzy między władzę ustawodawczą, wykonawczą i sądowniczą"], a: 3 },
+            { q: "Naczelnym organem kontroli państwowej jest:", o: ["Sąd Najwyższy", "Sejm RP", "Senat RP", "Najwyższa Izba Kontroli"], a: 3 },
+            { q: "Sejm i Senat są wybierane na kadencje:", o: ["5 letnie", "4 letnie", "3 letnie", "2 letnie"], a: 1 },
+            { q: "Wybrany do Sejmu może być obywatel polski, mający prawo wybierania, który najpóźniej w dniu wyborów kończy:", o: ["30 lat", "21 lat", "25 lat", "26 lat"], a: 1 },
+            { q: "Jak nazywa się gałąź prawa zajmująca się przestępstwami?", o: ["prawo cywilne", "prawo rodzinne", "prawo karne", "prawo administracyjne"], a: 2 },
+            { q: "Izbą niższą polskiego parlamentu jest:", o: ["Sejm", "Senat", "Najwyższa Izba Kontroli", "Trybunał Konstytucyjny"], a: 0 },
+            { q: "Prezydent RP wybierany jest na kadencję:", o: ["4 letnią", "5 letnią", "3 letnią", "6 letnią"], a: 1 },
+            { q: "Zwierzchnikiem Sił Zbrojnych w Rzeczypospolitej Polskiej jest:", o: ["Prezes Rady Ministrów", "Minister Obrony narodowej", "Marszałek Sejmu", "Prezydent RP"], a: 3 },
+            { q: "Obywatelstwo RP nadawane jest przez:", o: ["Prezydenta RP", "ministra", "wojewodę", "burmistrza"], a: 0 },
+            { q: "Immunitet parlamentarny przysługuje:", o: ["policjantowi", "adwokatowi", "sędziemu", "posłowi"], a: 3 },
+            { q: "Zdolność prawną osoba fizyczna nabywa", o: ["z chwilą ukończenia 13 roku życia", "z chwilą ukończenia 16 roku życia", "z chwilą uzyskania pełnoletniości", "z chwilą urodzenia"], a: 3 },
+            { q: "Władzę ustawodawczą w Rzeczpospolitej Polskiej sprawują:", o: ["Sejm", "Senat", "Sejm i Senat", "Sejm, Senat i Prezes Rady Ministrów"], a: 2 },
+            { q: "Przeciwnikiem powoda w procesie cywilnym jest:", o: ["oskarżyciel posiłkowy", "oskarżony", "pozwany", "prokurator"], a: 2 },
+            { q: "Najwyższym przedstawicielem Rzeczypospolitej Polskiej jest:", o: ["Prezydent RP", "Prezes Rady Ministrów", "Marszałek Sejmu", "Marszałek Senatu"], a: 0 },
+            { q: "Rada ministrów składa się z:", o: ["Ministrów", "Prezesa Rady Ministrów i Prezydenta RP", "Prezesa Rady Ministrów i ministrów", "Ministrów i zastępców ministrów"], a: 2 },
+            { q: "Władzę w Polsce dzielimy na:", o: ["ustawodawczą, wykonawczą, sądowniczą", "ustanowioną, wybieraną, sądowniczą", "miejską, powiatową, wojewódzką", "sejmową, ministerialną, wykonawczą"], a: 0 },
+            { q: "Organem udzielającym wotum zaufania nowo powołanemu premierowi w Polsce jest:", o: ["Prezydent", "Sejm", "Senat", "Rada Ministrów"], a: 1 },
+            { q: "Sejm i Senat obradują na:", o: ["naradach", "posiedzeniach", "sympozjach", "konferencjach"], a: 1 },
+            { q: "Która z poniższych funkcji należy do Prezydenta RP?", o: ["uchwalenie budżetu", "powoływanie sędziów", "kontrola konstytucyjności ustaw", "wydawanie ustaw"], a: 1 },
+            { q: "Zgodnie z Konstytucją RP ochronie niepodległości państwa i niepodzielności jego terytorium oraz zapewnieniu bezpieczeństwa i nienaruszalności jego granic służą:", o: ["Siły Zbrojne RP", "Straż Graniczna", "Wojska Obrony Terytorialnej", "Wojsko Polskie"], a: 0 },
+            { q: "Zgodnie z Konstytucją RP na straży wolności słowa, prawa do informacji oraz interesu publicznego w radiofonii i telewizji stoi:", o: ["Krajowa Rada Radiofonii i Telewizji", "Rada Mediów Narodowych", "Rada Programowa", "Rada Ministrów"], a: 0 },
+            { q: "Wyłączne prawo emisji pieniądza oraz ustalania i realizowania polityki pieniężnej ma:", o: ["Rada Ministrów", "Narodowy Bank Polski", "Międzynarodowy Fundusz Walutowy", "Mennica Polska"], a: 1 },
+            { q: "Zbrodnie przeciwko ludzkości:", o: ["są ścigane przez 30 lat", "są ścigane przez 50 lat", "są ścigane przez 100 lat", "nie podlegają przedawnieniu"], a: 3 },
+            { q: "Władza zwierzchnia w Rzeczypospolitej Polskiej należy do:", o: ["Prezydenta Rzeczypospolitej Polskiej", "Narodu", "Rady Ministrów", "Sądów powszechnych"], a: 1 },
+            { q: "Każdego uważa się za niewinnego dopóki:", o: ["nie przyzna się on do popełnienia przestępstwa", "nie przyzna się on do winy", "nie zostanie skazany", "jego wina nie zostanie stwierdzona prawomocnym wyrokiem sądu"], a: 3 },
+            { q: "Europejski Trybunał Praw Człowieka to:", o: ["instytucja Unii Europejskiej odpowiedzialna za rozstrzyganie sporów handlowych", "organ międzynarodowy, który ocenia skargi na naruszenia praw człowieka w krajach członkowskich Rady Europy", "sąd, który rozpatruje skargi obywateli na władze krajowe", "organ ONZ odpowiedzialny za egzekwowanie Powszechnej Deklaracji Praw Człowieka"], a: 1 },
+            { q: "Zasada uniwersalności praw człowieka oznacza:", o: ["prawa człowieka dotyczą tylko obywateli państw demokratycznych", "prawa człowieka to przywileje tylko osób pełnoletnich", "prawa człowieka obowiązują tylko w krajach, które je podpisały", "prawa człowieka są niezbywalne i przysługują każdemu człowiekowi, niezależnie od narodowości, rasy, płci czy religii"], a: 3 },
+            { q: "Prawa człowieka to:", o: ["prawa obywatelskie dotyczące tylko mieszkańców danego państwa", "przepisy dotyczące organizacji politycznych", "zbiór obowiązków wobec obywateli", "zbiór przepisów wynikający z godności ludzkiej, chroniących wolność i prawa każdej osoby"], a: 3 },
+            { q: "Powszechna Deklaracja Praw Człowieka została przyjęta przez:", o: ["ONZ", "Unię Europejską", "Trójkąt Weimarski", "OBWE"], a: 0 },
+            { q: "Trybunał Konstytucyjny orzeka o:", o: ["zgodności ustawy z Konstytucją", "odpowiedzialności karnej w związku z zajmowanym stanowiskiem Prezydenta RP i Prezesa Rady Ministrów", "odpowiedzialności cywilnej członków rządu", "zgodności ustaw z uchwałami Sejmu"], a: 0 },
+            { q: "Które z poniższych praw nie jest prawem obywatelskim gwarantowanym przez Konstytucję?", o: ["prawo do posiadania broni", "prawo do prowadzenia działalności gospodarczej", "prawo do ubezpieczenia zdrowotnego", "prawo do prywatności"], a: 0 },
+            { q: "Ambasadorów RP mianuje:", o: ["Premier RP", "Minister Spraw Zagranicznych RP", "Prezydent RP", "Minister Obrony Narodowej"], a: 2 },
+            { q: "Ministra powołuje i odwołuje:", o: ["Prezes Rady Ministrów", "Marszałek Sejmu", "Prezydent", "Marszałek Senatu"], a: 0 },
+            { q: "Organem odpowiedzialnym za ochronę praw człowieka i obywatela przed naruszeniami ze strony władzy publicznej jest:", o: ["Rzecznik Praw Obywatelskich", "Prezes Najwyższej Izby Kontroli", "Rzecznik Praw Konsumenta", "Prezes Trybunału Konstytucyjnego"], a: 0 },
+            { q: "Przestępstwo handlu ludźmi zgodnie z kodeksem karnym jest:", o: ["uchybieniem", "zbrodnią", "wykroczeniem", "przewinieniem"], a: 1 },
+            { q: "Kto przedstawia Prezydentowi ustawy do podpisu?", o: ["Szef Kancelarii Prezydenta", "Marszałek Senatu", "Marszałek Sejmu", "Doradca Prezydenta RP"], a: 2 },
+            { q: "Rzecznik Praw Obywatelskich składa sprawozdanie ze swojej działalności do:", o: ["Prezydenta RP", "Sejmu RP i Senatu RP", "wyłącznie Senatu RP", "Trybunału Konstytucyjnego"], a: 1 },
+            { q: "Kto powołuje Rzecznika Praw Obywatelskich?", o: ["Prezydent RP", "Sejm RP", "Senat RP", "Rada Ministrów"], a: 1 },
+            { q: "Obowiązująca aktualnie Polska Konstytucja została uchwalona:", o: ["3 maja 1990 r.", "5 kwietnia 1991 r.", "2 kwietnia 1997 r.", "2 kwietnia 1999 r."], a: 2 },
+            { q: "Zgodnie z Konstytucją RP Prezydent RP nie ma kompetencji do:", o: ["prawa łaski", "zwierzchnictwa nad Siłami Zbrojnymi", "rozwiązywania Sejmu przed upływem jego kadencji z własnej inicjatywy", "zwoływania Rady Gabinetowej"], a: 2 },
+            { q: "Odpowiedzialność karną za popełnione przestępstwo nabywa się:", o: ["w dniu ukończenia 17 lat", "w dniu ukończenia 18 lat", "w dniu ukończenia 21 lat", "w dniu ukończenia 16 lat"], a: 0 },
+            { q: "Karą za przestępstwo nie jest:", o: ["dożywotnie pozbawienie wolności", "pouczenie i nagana", "grzywna", "kara ograniczenia wolności"], a: 1 },
+            { q: "W Polsce, zgodnie z zasadą precedencji, drugą najważniejszą osobą w państwie jest:", o: ["Prezes Rady Ministrów", "Marszałek Senatu", "Marszałek Sejmu", "Prezes Trybunału Konstytucyjnego"], a: 2 },
+            { q: "Ilu parlamentarzystów liczy polski Senat?", o: ["460", "200", "100", "55"], a: 2 },
+            { q: "Zgodnie z Konstytucją Rzeczypospolitej Polskiej Sejm i Senat są wybierane na:", o: ["dwuletnie kadencje", "czteroletnie kadencje", "sześcioletnie kadencje", "ośmioletnie kadencje"], a: 1 },
+            { q: "Zbrodnie ludobójstwa oraz zbrodnie wojenne osądza:", o: ["Międzynarodowy Trybunał Praw Człowieka w Strasburgu", "Międzynarodowy Trybunał Karny w Hadze", "Międzynarodowy Trybunał Wojskowy w Norymberdze", "Międzynarodowy Trybunał ds. Zbrodni przeciwko Ludzkości w Brukseli"], a: 1 },
+            { q: "Minimalny wiek kandydata na prezydenta RP wynosi:", o: ["30 lat", "35 lat", "40 lat", "45 lat"], a: 1 },
+            { q: "Odpowiedzialności za wykroczenie podlega ten, kto ukończył:", o: ["17 rok życia", "18 rok życia", "21 rok życia", "wiek sprawcy nie ma znaczenia"], a: 0 },
+            { q: "Ministra powołuje i odwołuje:", o: ["Prezes Rady Ministrów", "Marszałek Sejmu", "Prezydent", "Marszałek Senatu"], a: 0 },
+            { q: "Prezydent Rzeczypospolitej jest wybierany w wyborach powszechnych przez Naród na kadencję:", o: ["4-letnią i może być ponownie wybrany tylko raz", "5-letnią i może być ponownie wybrany tylko raz", "5-letnią i może być ponownie wybrany 2-krotnie", "6-letnią i nie może być ponownie wybrany"], a: 1 },
+            { q: "Przestępstwa ze względu na rodzaj winy dzielą się na:", o: ["umyślne i nieumyślne", "zbrodnie i występki", "ścigane z urzędu i ścigane na wniosek", "administracyjne, gospodarcze i kryminalne"], a: 0 },
+            { q: "Bierne prawo wyborcze w wyborach do Sejmu RP uzyskuje obywatel w wieku:", o: ["19 lat", "21 lat", "35 lat", "40 lat"], a: 1 },
+            { q: "Klub poselski, zgodnie z regulaminem Sejmu i Senatu, tworzy co najmniej:", o: ["15 posłów", "33 posłów", "100 posłów", "260 posłów"], a: 0 },
+            { q: "Odpowiedzialność za czyny zabronione pod groźbą kary stanowiące przestępstwo, reguluje:", o: ["Ustawa z dnia z dnia 6 czerwca 1997r. Kodeks karny", "Ustawa z dnia 23 kwietnia 1964r. Kodeks cywilny", "Ustawa z dnia 15 września 2000r. Kodeks spółek handlowych", "Ustawa z dnia 6 kwietnia 1990 r. o Policji"], a: 0 },
+            { q: "Najwyższa kara stosowana w polskim systemie prawnym to:", o: ["kara 25 lat pozbawienia wolności", "kara 30 lat pozbawienia wolności", "dożywotnie pozbawienie wolności", "kara śmierci"], a: 2 },
+            { q: "Termin wyborów prezydenckich w Polsce ogłasza:", o: ["Prezes Rady Ministrów", "Marszałek Senatu", "Marszałek Sejmu", "Prezydent"], a: 1 },
+            { q: "Rzecznik Praw Obywatelskich RP:", o: ["bada zgodność aktów prawnych z konstytucją", "organizuje pikiety wolnościowe", "rozstrzyga spory między obywatelami, które podlegają rozpoznaniu przez sądy", "stoi na straży wolności i praw człowieka"], a: 3 },
+            { q: "Oddziały Straży Granicznej tworzy i znosi:", o: ["Komendant Główny Straży Granicznej, w drodze zarządzenia", "minister właściwy do spraw wewnętrznych, w drodze rozporządzenia", "Prezes Rady Ministrów na wniosek ministra właściwego do spraw wewnętrznych, w drodze rozporządzenia", "Prezydent RP"], a: 1 },
+            { q: "Najmniejsza jednostka samorządu terytorialnego w Polsce to:", o: ["dzielnica", "kolonia", "gmina", "powiat"], a: 2 },
+            { q: "Przedstawicielem Rady Ministrów w województwie jest:", o: ["prezydent miasta", "wojewoda", "sejmik samorządowy", "marszałek sejmiku"], a: 1 },
+            { q: "Wybory do Sejmiku województwa odbywają się co:", o: ["4 lata", "5 lat", "3 lata", "nie ma takich wyborów"], a: 1 },
+            { q: "Burmistrz jest wybierany:", o: ["w wyborach ogólnych pośrednich", "w bezpośrednich wyborach powszechnych", "przez radę gminy", "przez radę miasta"], a: 1 },
+            { q: "Na czele urzędu wojewódzkiego stoi:", o: ["dyrektor generalny", "sekretarz wojewody", "wojewoda", "marszałek województwa"], a: 2 },
+            { q: "Skrót NSA oznacza:", o: ["Naczelny Sąd Apelacyjny", "Naczelny Sąd Akredytacyjny", "Naczelny Sąd Administracyjny", "Narodowa Agencja Aeronautyki i Przestrzeni Kosmicznej"], a: 2 },
+            { q: "Aktualnie w Polsce liczba województw wynosi:", o: ["15", "16", "30", "49"], a: 1 },
+            { q: "Zadaniem Straży Granicznej jest:", o: ["nakładanie ceł na przewożone przez granicę towary", "wydawanie wiz i zezwoleń na przekraczanie granicy", "ochrona granicy państwowej w przestrzeni powietrznej", "ściganie sprawców wszystkich przestępstw"], a: 1 },
+            { q: "Straż Graniczna nie zajmuje się:", o: ["ochroną granicy państwowej na lądzie i morzu", "kontrolą ruchu granicznego", "egzekwowaniem podatków", "przeciwdziałaniem nielegalnej migracji"], a: 2 },
+            { q: "Do przekroczenia granicy państwowej nie uprawnia:", o: ["prawo jazdy", "paszport", "dowód osobisty", "książeczka żeglarska"], a: 0 },
+            { q: "Komendant Główny Straży Granicznej jest centralnym organem administracji rządowej podległym:", o: ["ministrowi Obrony Narodowej", "ministrowi właściwemu do spraw wewnętrznych", "ministrowi właściwemu do spraw zagranicznych", "Prezesowi Rady Ministrów"], a: 1 },
+            { q: "2 maja obchodzimy w Polsce:", o: ["Dzień Zwycięstwa", "Dzień Flagi", "Dzień Strażaka", "Święto Straży Granicznej"], a: 1 },
+            { q: "Instytucją UE powołaną do koordynacji i wsparcia ochrony granic zewnętrznych UE jest:", o: ["Agencja Frontex", "Parlament Europejski", "Straż Graniczna", "Policje państw członkowskich UE"], a: 0 },
+            { q: "Obszar obejmujący 29 państw, w których zniesiono kontrole graniczne na granicach wewnętrznych, to:", o: ["obszar krajów należących do NATO", "Strefa Czystego Transportu", "Strefa Schengen", "Unia Europejska"], a: 2 },
+            { q: "W dwudziestoleciu międzywojennym ochrona granic Polski realizowana była przez:", o: ["Straż Graniczną", "Korpus Ochrony Pogranicza", "Korpus Ochrony Pogranicza i Straż Graniczną", "Wojska Ochrony Pogranicza"], a: 1 },
+            { q: "Siedziba komendy Bieszczadzkiego Oddziału Straży Granicznej znajduje się w:", o: ["Nowym Sączu", "Rzeszowie", "Przemyślu", "Chełmie"], a: 2 },
+            { q: "Najniższy stopień w Straży Granicznej to:", o: ["kapral Straży Granicznej", "szeregowy Straży Granicznej", "plutonowy Straży Granicznej", "referent Straży Granicznej"], a: 1 },
+            { q: "Komendanta Głównego Straży Granicznej powołuje:", o: ["minister właściwy do spraw wewnętrznych", "Prezes Rady Ministrów", "minister właściwy do spraw zagranicznych", "Prezes Rady Ministrów na wniosek ministra właściwego do spraw wewnętrznych"], a: 3 },
+            { q: "W Straży Granicznej obowiązują następujące korpusy:", o: ["korpus szeregowych i oficerów", "korpus szeregowych i podoficerów", "korpus szeregowych i chorążych", "korpus szeregowych, podoficerów, chorążych i oficerów"], a: 3 },
+            { q: "Obowiązek współdziałania ze Strażą Graniczną dotyczy:", o: ["organów administracji rządowej", "jednostek samorządu terytorialnego", "innych jednostek organizacyjnych", "wszystkie odpowiedzi są prawidłowe"], a: 3 },
+            { q: "Straż Graniczna została utworzona:", o: ["ustawą z dnia 12 października 1990 r. o Straży Granicznej", "ustawą oddzielającą Straż Graniczną od Policji", "ustawą z dnia 12 grudnia 1999 r. o Służbie Granicznej", "ustawą z dnia 15 maja 1990 r. o Służbie w Straży Granicznej"], a: 0 },
+            { q: "Straż Graniczna jest podzielona:", o: ["na Oddziały Straży Granicznej", "zgodnie z podziałem administracyjnym Polski", "zgodnie z zaleceniami Premiera", "na powiaty i gminy"], a: 0 },
+            { q: "Organem właściwym do wydania paszportu jest:", o: ["prezydent miasta na prawach powiatu", "burmistrz miasta", "wojewoda", "minister właściwy do spraw wewnętrznych"], a: 0 },
+            { q: "Zbiór PESEL to:", o: ["losowo wybrany numer oznaczający osobę", "kolejny numer określający kobietę lub mężczyznę", "Powszechny System Ewidencji Ludności", "Powszechny Elektroniczny System Ewidencji Ludności"], a: 3 },
+            { q: "Rzeki, wzdłuż których została wytyczona zachodnia granica Polski z Niemcami to:", o: ["Odra i Nysa Łużycka", "Warta i Nysa Łużycka", "Odra i Warta", "Wkra i Bug"], a: 0 },
+            { q: "Państwa, z którymi Polska posiada granicę lądową to:", o: ["Niemcy, Słowenia, Czechy Rosja Litwa, Białoruś, Ukraina", "Niemcy, Szwecja, Czechy, Rosja, Litwa, Białoruś, Ukraina", "Niemcy, Słowacja, Czechy, Rosja, Litwa, Białoruś, Ukraina", "Niemcy, Słowacja, Czechy, Łotwa, Litwa, Białoruś, Ukraina"], a: 2 },
+            { q: "Do podstawowych zadań Straży Granicznej należy:", o: ["ochrona granicy państwowej, kontrola ruchu granicznego, zapobieganie i przeciwdziałanie nielegalnej migracji", "ochrona granicy państwowej w przestrzeni powietrznej", "kontrola celna przepływu towarów przez granicę", "kontrola legalności zatrudnienia obywateli RP"], a: 0 },
+            { q: "Straż Graniczna to:", o: ["jednolita, umundurowana i uzbrojona formacja przeznaczoną do ochrony granicy państwowej", "formacja wojskowa", "formacja jednolita i przymusowa", "formacja paramilitarna"], a: 0 },
+            { q: "Co oznacza pojęcie granica zewnętrzna UE?", o: ["granica Polski z Niemcami", "granica państw UE z państwami spoza Unii Europejskiej", "każda granica województwa", "granica miast przygranicznych"], a: 1 },
+            { q: "Powołana 01 października 2023 roku Wyższa Szkoła Straży Granicznej znajduje się w:", o: ["Lubaniu", "Kętrzynie", "Koszalinie", "Warszawie"], a: 0 },
+            { q: "Siedziba Komendy Głównej Straży Granicznej znajduje się w:", o: ["Warszawie", "Gdańsku", "Raciborzu", "Przemyślu"], a: 0 },
+            { q: "Agencja o nazwie FRONTEX oznacza:", o: ["Agencję Bezpieczeństwa Wewnętrznego", "Europejską Agencję Rozwoju", "Europejską Agencję Straży Granicznej i Przybrzeżnej", "organizację non-profit zajmującą się pomocą humanitarną dla nielegalnych migrantów"], a: 2 },
+            { q: "Podporucznik Straży Granicznej to stopień służbowy należący do korpusu:", o: ["szeregowych", "podoficerów", "chorążych", "oficerów"], a: 3 },
+            { q: "Terenowymi organami Straży Granicznej są:", o: ["komendanci oddziałów, placówek i dywizjonów Straży Granicznej", "komendanci ośrodków szkolenia i Wyższej Szkoły Straży Granicznej", "komendanci drogowych i osobowych przejść granicznych", "dowódcy jednostek pływających Straży Granicznej"], a: 0 },
+            { q: "Straż Graniczna, jako jednolita, umundurowana i uzbrojona formacja została powołana ustawą z dnia:", o: ["12 października 1991 r.", "12 października 1990 r.", "16 maja 1991 r.", "31 maja 1995 r."], a: 1 },
+            { q: "Nadzór nad działalnością sądów powszechnych i wojskowych w zakresie orzekania sprawuje:", o: ["Sąd Najwyższy", "Trybunał Stanu", "Naczelny Sąd Administracyjny", "Prezes NIK"], a: 0 },
+            { q: "Starosta kieruje:", o: ["gminą", "urzędem", "powiatem", "województwem"], a: 2 },
+            { q: "Osoba, która opuszcza miejsce zamieszkania w celu osiedlenia się w innym kraju to:", o: ["uchodźca", "emigrant", "azylant", "imigrant"], a: 1 },
+            { q: "Kadencja wójta, burmistrza i prezydenta miasta trwa:", o: ["5 lat", "4 lata", "6 lat", "3 lata"], a: 0 },
+            { q: "Straż Graniczna to formacja typu:", o: ["wojskowego", "policyjnego", "zmilitaryzowanego", "społecznego"], a: 1 },
+            { q: "Straż Graniczna jako formacja podlega:", o: ["Ministerstwu Obrony Narodowej", "Ministerstwu Spraw Wewnętrznych i Administracji", "Prezesowi Rady Ministrów", "Prezydentowi"], a: 1 },
+            { q: "Zgodnie z Ustawą o Straży Granicznej, Straż Graniczna to formacja:", o: ["jednolita, umundurowana, uzbrojona", "umundurowana, skoszarowana, uzbrojona", "militarna, wyspecjalizowana, zmotoryzowana", "umundurowana, skoszarowana, wyspecjalizowana"], a: 0 },
+            { q: "Granica rzeczna z Białorusią i Ukrainą przebiega na:", o: ["Bugu", "Warcie", "Wiśle", "Odrze"], a: 0 },
+            { q: "Ministrowi Spraw Wewnętrznych i Administracji podlegają:", o: ["Komendant Główny Policji", "Komendant Główny Straży Granicznej", "Komendant Służby Ochrony Państwa", "wszystkie ww. odpowiedzi są prawidłowe"], a: 3 },
+            { q: "Cudzoziemiec w świetle prawa polskiego, to:", o: ["osoba, która nie mieszka w Polsce", "osoba, która przekroczyła granicę danego państwa", "osoba, która nie posiada obywatelstwa polskiego", "osoba, która migruje"], a: 2 },
+            { q: "Ile oddziałów znajduje się w strukturze Straży Granicznej?", o: ["7", "9", "11", "12"], a: 1 },
+            { q: "W jakich sytuacjach funkcjonariusz Straży Granicznej może użyć środków przymusu bezpośredniego?", o: ["tylko na granicy zewnętrznej", "w każdym przypadku nieposłuszeństwa", "w sytuacji zagrożenia zdrowia, życia lub naruszenia porządku prawnego", "tylko za zgodą sądu"], a: 2 },
+            { q: "Co obejmuje kontrola graniczna?", o: ["tylko sprawdzenie paszportu", "ocenę dokumentów, osób i pojazdów przekraczających granicę", "sprawdzanie miejsc zamieszkania cudzoziemców", "weryfikację poziomu języka polskiego"], a: 1 },
+            { q: "W jaki sposób Straż Graniczna przeciwdziała nielegalnej migracji?", o: ["poprzez działania tylko w urzędach", "poprzez wsparcie służb celnych", "poprzez patrole, monitoring granic i kontrole legalności pobytu", "poprzez działania wyłącznie prewencyjne"], a: 2 }
+        ];
+
+        let selectedQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+
+        // Elementy DOM
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const resultScreen = document.getElementById('result-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        const questionTitle = document.getElementById('question-title');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        const scoreCounter = document.getElementById('score-counter');
+
+        const finalScore = document.getElementById('final-score');
+        const finalMessage = document.getElementById('final-message');
+        const resultIcon = document.getElementById('result-icon');
+
+        // Bezpieczny start - przypisanie event listenerów po załadowaniu drzewa DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            startBtn.addEventListener('click', startQuiz);
+            nextBtn.addEventListener('click', handleNextQuestion);
+            restartBtn.addEventListener('click', startQuiz);
+        });
+
+        function startQuiz() {
+            // Losowanie 10 unikalnych pytań z bazy
+            const shuffled = [...DATABASE].sort(() => 0.5 - Math.random());
+            selectedQuestions = shuffled.slice(0, 10);
+            
+            currentIndex = 0;
+            score = 0;
+
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const item = selectedQuestions[currentIndex];
+            
+            // Aktualizacja wskaźników
+            progressText.innerText = `Pytanie ${currentIndex + 1} z ${selectedQuestions.length}`;
+            progressBar.style.width = `${((currentIndex + 1) / selectedQuestions.length) * 100}%`;
+            scoreCounter.innerText = `Wynik: ${score}`;
+
+            questionTitle.innerText = `${currentIndex + 1}. ${item.q}`;
+            optionsContainer.innerHTML = '';
+            nextBtn.classList.add('hidden');
+
+            const prefixes = ['a', 'b', 'c', 'd'];
+
+            item.o.forEach((optText, idx) => {
+                const button = document.createElement('button');
+                button.className = "w-full text-left p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition duration-150 flex items-start space-x-3 font-medium text-slate-700 option-btn";
+                
+                button.innerHTML = `
+                    <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">${prefixes[idx]}</span>
+                    <span>${optText}</span>
+                `;
+
+                button.addEventListener('click', () => handleOptionClick(idx, item.a, button));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function handleOptionClick(selectedIdx, correctIdx, clickedBtn) {
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            
+            // Zablokuj powtórne klikanie
+            allBtns.forEach(btn => btn.disabled = true);
+
+            if (selectedIdx === correctIdx) {
+                score++;
+                clickedBtn.classList.remove('bg-slate-50', 'border-slate-200', 'text-slate-700');
+                clickedBtn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900', 'font-semibold');
+            } else {
+                clickedBtn.classList.remove('bg-slate-50', 'border-slate-200', 'text-slate-700');
+                clickedBtn.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-900');
+                
+                // Pokaż prawidłową odpowiedź
+                const correctBtn = allBtns[correctIdx];
+                correctBtn.classList.remove('bg-slate-50', 'border-slate-200', 'text-slate-700');
+                correctBtn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900', 'font-semibold');
+            }
+
+            scoreCounter.innerText = `Wynik: ${score}`;
+            nextBtn.classList.remove('hidden');
+        }
+
+        function handleNextQuestion() {
+            currentIndex++;
+            if (currentIndex < selectedQuestions.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            questionScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            finalScore.innerText = `${score} / ${selectedQuestions.length}`;
+
+            if (score >= 9) {
+                resultIcon.className = "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-emerald-100 text-emerald-600";
+                resultIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>`;
+                finalMessage.innerText = "Znakomity wynik! Jesteś w pełni przygotowany.";
+            } else if (score >= 6) {
+                resultIcon.className = "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-amber-100 text-amber-600";
+                resultIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+                finalMessage.innerText = "Dobry wynik, ale warto jeszcze powtórzyć niektóre zagadnienia.";
+            } else {
+                resultIcon.className = "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-rose-100 text-rose-600";
+                resultIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>`;
+                finalMessage.innerText = "Musisz poświęcić jeszcze trochę czasu na naukę. Spróbuj ponowne!";
+            }
+        }
+    </script>
+</body>
+</html>
